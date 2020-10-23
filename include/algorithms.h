@@ -44,7 +44,7 @@ public:
      */
     double reprojectError(const ImageBase *cam, const std::vector<Vec3> &obj_points, const std::vector<Vec2> &img_points);
     void noiseTest(ImageBase *cam, const std::string &path_obj_points, const std::string &path_img_points, const std::string &path_test_obj_points, const std::string &path_test_img_points);
-    void noiseTeset(ImageBase *cam, dtype deviation = 5.);    
+    void noiseTest(ImageBase *cam, dtype deviation = 5.);
 };
 
 class P3P {
@@ -55,6 +55,7 @@ private:
     std::vector<dtype> solveQuartic(const dtype &a4, const dtype &a3, const dtype &a2, const dtype &a1, const dtype &a0);
 public:
     void solve(ImageBase *cam, const std::vector<Vec3> &obj_points, const std::vector<Vec2> &img_points, int method = 0);
+    static std::string getName() {return "P3P";}
 };
 
 #endif //SDF2SDF_ALGORITHMS_H

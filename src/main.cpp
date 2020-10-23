@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     Vec3 t(.003737, -.004009, .720708);
     rgb_cam->setRotation(R);
     rgb_cam->setTranslation(t);
-    pnp_module->noiseTeset(rgb_cam.get(), 3.);
+    pnp_module->noiseTest(rgb_cam.get(), 3.);
     return 0;
 
     ofstream fout("../res/rotation.mat", ofstream::out);
