@@ -12,6 +12,69 @@
 using namespace std;
 using namespace cv;
 
+
+void PnpBase::setRandomGeneratorSeed(int seed) {
+    this->generator.seed(seed);
+}
+
+void PnpBase::setUniformDistribution(dtype lower, dtype upper) {
+    uniform_distribution = uniform_real_distribution<double>(lower, upper);
+}
+
+void PnpBase::setBinomialDistribution(int upper, dtype p) {
+    int_noise_distribution = binomial_distribution<int>(upper, p);
+}
+
+dtype PnpBase::genNumFromDistribution(int method) {
+    switch (method) {
+        case 0:
+            return uniform_distribution(generator);
+        case 1:
+            return int_noise_distribution(generator);
+        default:
+            return -1;
+    }
+}
+
+void PnpBase::genRect3dPair2d(const ImageBase *cam, std::vector<std::vector<Vec3>> &obj_points, std::vector<std::vector<Vec2>> &img_points, int num_sets, int num_pairs) {
+    Mat3 K = cam->getIntrinsic();
+    Mat3 R = cam->getRotation();
+    Vec3 t = cam->getTranslation();
+    obj_points.clear();
+    img_points.clear();
+    obj_points.resize(num_sets);
+    img_points.resize(num_sets);
+    int count = 0;
+    int margin = 10;
+    while (count < num_sets) {
+        auto val = genNumFromDistribution(0);
+        bool valid = true;
+        for (int i = -1; i <= 1; i += 2) {
+            for (int j = (i == -1 ? -1 : 1); i == -1 ? j <= 1 : j >= -1; j += (i == -1 ? 2 : -2)) {
+                obj_points[count].emplace_back(Vec3(i * val, j * val, 0));
+                Vec3 projection = K * (R * obj_points[count].back() + t);
+                projection /= projection[2];
+                if (projection[0] >= cam->getWidth() - margin || projection[0] < margin ||
+                    projection[1] >= cam->getHeight() - margin || projection[1] < margin) {
+                    valid = false;
+                }
+                img_points[count].emplace_back(Vec2(projection[0], projection[1]));
+            }
+        }
+        if (!valid) {
+            img_points[count].clear();
+            count--;
+        }
+        count++;
+    }
+
+    // verify
+//    for (int i = 0; i < num_sets; i++) {
+//        for (int j = 0; j < 4; j++)
+//            printf("%.4f\t%.4f\t%.4f\n%.4f\t%.4f\n\n", obj_points[i][j][0], obj_points[i][j][1], obj_points[i][j][2], img_points[i][j][0], img_points[i][j][1]);
+//    }
+}
+
 std::vector<Vec3> PnpBase::loadObjPointsFromFile(const std::string &file_path) {
     ifstream fin(file_path, ifstream::in);
     if (!fin.is_open()) {

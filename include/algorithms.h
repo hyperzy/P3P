@@ -11,6 +11,20 @@
 #include <random>   // for generating normal distribution
 
 class PnpBase {
+private:
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> uniform_distribution;
+    std::binomial_distribution<int> int_noise_distribution;
+    void setRandomGeneratorSeed(int seed);
+    /**
+     * @brief Set up uniform distribution generator
+     * @param lower
+     * @param upper
+     */
+    void setUniformDistribution(dtype lower, dtype upper);
+    void setBinomialDistribution(int upper, dtype p);
+    dtype genNumFromDistribution(int method = 0);
+    void genRect3dPair2d(const ImageBase *cam, std::vector<std::vector<Vec3>> &obj_points, std::vector<std::vector<Vec2>> &img_points, int num_sets = 1, int num_pairs = 4);
 public:
     std::vector<Vec3> loadObjPointsFromFile(const std::string &file_path);
     std::vector<Vec2> loadImgPointsFromFile(const std::string &file_path);
