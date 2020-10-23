@@ -234,7 +234,19 @@ void P3P::P3P_LKneip(ImageBase *cam, const vector<Vec3> &obj_points, const vecto
     vector<Vec2> img_points_2{img_points[0], img_points[1], img_points[2]};
     auto candidates = P3P_LKneipCandidates(cam, obj_points_3, img_points_2);
     Mat3 K = cam->getIntrinsic();
-    
+    int min_projection_err_idx;
+    dtype min_projection_err = std::numeric_limits<dtype>::max();
+    for (int i = 0; i < candidates.size(); i++) {
+        Vec3 projection = candidates[i].leftCols(3) * obj_points[3] + candidates[i].rightCols(1);
+        projection /= projection[2];
+        dtype err = pow(projection[0] - img_points[3][0], 2) + pow(projection[1] - img_points[3][1], 2);
+        if (err < min_projection_err) {
+            min_projection_err = err;
+            min_projection_err_idx = i;
+        }
+    }
+    cam->setRotation(candidates[min_projection_err_idx].leftCols(3));
+    cam->setTranslation(candidates[min_projection_err_idx].rightCols(1));
 }
 
 std::vector<Eigen::Matrix<dtype, 3, 4>>
