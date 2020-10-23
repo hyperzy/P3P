@@ -237,7 +237,7 @@ void P3P::P3P_LKneip(ImageBase *cam, const vector<Vec3> &obj_points, const vecto
     int min_projection_err_idx;
     dtype min_projection_err = std::numeric_limits<dtype>::max();
     for (int i = 0; i < candidates.size(); i++) {
-        Vec3 projection = candidates[i].leftCols(3) * obj_points[3] + candidates[i].rightCols(1);
+        Vec3 projection = K * (candidates[i].leftCols(3) * obj_points[3] + candidates[i].rightCols(1));
         projection /= projection[2];
         dtype err = pow(projection[0] - img_points[3][0], 2) + pow(projection[1] - img_points[3][1], 2);
         if (err < min_projection_err) {
